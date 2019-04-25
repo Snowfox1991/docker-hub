@@ -1,24 +1,36 @@
-version: '2'
+version: '3'
 services:
-  webserver: 
-    build: .
-    ports: 
-      - '80:80' 
-    volumes:
-      - ./:/var/www/html 
-      - ./apache.conf:/etc/apache2/sites-available/000-default.conf
-    links:
-      - db 
 
-  db: 
-    image: mysql:5.7 
+  # The Application
+  app:
+    build:
+      context: ./
+      dockerfile: app.dockerfile
+    working_dir: /var/www
     volumes:
-      - "./data/db:/var/lib/mysql"
-    restart: always
-    environment: 
-      MYSQL_ROOT_PASSWORD: root 
-      MYSQL_DATABASE: my_db
-      MYSQL_USER: Snowfox1991
-      MYSQL_PASSWORD: laravel
+      - ./:/var/www/
+
+  # The Web Server
+  web:
+    build:
+      context: ./
+      dockerfile: web.dockerfile
+    working_dir: /var/www
     ports:
-      - "3306:3306"
+      - 8080:80
+
+  # The Database
+  database:
+    image: mysql:5.6
+    volumes:
+      - dbdata:/var/lib/mysql
+    environment:
+      - "MYSQL_DATABASE=my_db"
+      - "MYSQL_USER=Snowfox1991"
+      - "MYSQL_PASSWORD=Snowfox1991"
+      - "MYSQL_ROOT_PASSWORD=root"
+    ports:
+        - "33061:3306"
+
+volumes:
+  dbdata:
